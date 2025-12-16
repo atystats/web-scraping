@@ -3,21 +3,21 @@ from parsel import Selector
 def get_clubs(html):
 
     selector = Selector(text=html)
-    tables = soup.select('table[class = "wikitable"]') # select is used to find content using css selectors
-    matches = tables[0]
-    trs = matches.select('tr')
+    matches = selector.xpath('//table[@class = "wikitable"]')[0] # '//' is used to find content in the whole document.
+    trs = matches.xpath('.//tr')
+
     ronaldo_club = []
-    club_links =[]
-    for tr in trs:
-        clubs = tr.select_one('td:nth-child(1)')
-        club_link = None
+    club_links = []
+    for tr in trs[2:]:
+        clubs = tr.xpath('./td[1]')
         if not clubs:
             continue
-        club = clubs.select_one("a")
+        club = clubs.xpath("a/text()").get()
         if club is None:
             continue
-        club_link = f"https://en.wikipedia.org/{club['href']}"
-        ronaldo_club.append(club.string)
+        link = clubs.xpath("a/@href").get()
+        club_link = f"https://en.wikipedia.org/{link}"
+        ronaldo_club.append(club)
         club_links.append(club_link)
 
     new_list = []
