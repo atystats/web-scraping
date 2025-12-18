@@ -31,3 +31,41 @@ def get_clubs(html):
             
 
     return new_list
+
+def get_player_info(html):
+    selector = Selector(text = html)
+    trs = selector.xpath('//table[@class = "infobox infobox-table vcard"]/tbody/tr')
+
+    player_info = {
+        'name': None,
+        'image': None
+    }
+    
+    player_info['name'] = selector.xpath('//table[@class = "infobox infobox-table vcard"]/caption/text()').get()
+    link = trs[0].xpath('./td/span/a/@href').get()
+    player_info['image'] = f"https://en.wikipedia.org/{link}"
+    
+    for tr in trs[2:]:
+        key : str = tr.xpath("./th/text()").get()
+        value = tr.xpath("./td/a/text()").get()
+        if value is None:
+            value = tr.xpath("./td/text()").get()
+
+        if key is None or value is None:
+            continue
+
+        if key.startswith('Full name'):
+            player_info["Full Name"] = value.strip('\n')
+        elif key.startswith('Place of birth'):
+            player_info['Birth Place'] = value
+        elif key.startswith('Height'):
+            parts = value.split('(')
+            metric = parts[0].strip(' ')
+            imp = parts[1].strip(')')
+            player_info['Height'] = {
+                'imperial': imp,
+                'metric': metric
+            }
+
+    return player_info
+
