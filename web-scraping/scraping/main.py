@@ -30,8 +30,8 @@ def default():
     response = requests.get(url, headers=headers)
     results = handler(response.text)
 
-    json_payload = json.dumps(results, ensure_ascii=False)
-    #json_payload = json.dumps(results)
+    #json_payload = json.dumps(results, ensure_ascii=False)
+    json_payload = json.dumps(results)
 
     with open(f'{output}.json', 'w', encoding='utf-8') as f:
         #f.write(json_payload.encode('ascii', 'ignore').decode('utf-8'))

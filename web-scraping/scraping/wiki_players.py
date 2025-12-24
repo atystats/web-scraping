@@ -1,5 +1,6 @@
 from parsel import Selector
 import requests 
+import re
 
 headers = {"User-Agent" : "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.6 Safari/605.1.15"}
 
@@ -71,12 +72,16 @@ def get_player_info(html):
         elif key.startswith('Place of birth'):
             player_info['Birth Place'] = value
         elif key.startswith('Height'):
-            parts = value.split('(')
-            metric = parts[0].strip(' ')
-            imp = parts[1].strip(')')
+            match = re.search('(?P<metric>[\d.]+.m) \((?P<imperial>(\d.ft.\d{1,2}.in))\)',value)
+            if match is None:
+                print('failed height match', value)
+                continue
+            # parts = value.split('(')
+            # metric = parts[0].strip(' ').strip('\n')
+            # imp = parts[1].strip(')')
             player_info['Height'] = {
-                'imperial': imp,
-                'metric': metric
+                'imperial': match.group('imperial').replace('\u00a0', ' '),
+                'metric': match.group('metric').replace('\u00a0', ' ')
             }
 
     return player_info
