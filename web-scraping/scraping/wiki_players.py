@@ -1,5 +1,6 @@
 from parsel import Selector
 import requests 
+import dateparser
 import re
 
 headers = {"User-Agent" : "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.6 Safari/605.1.15"}
@@ -83,6 +84,9 @@ def get_player_info(html):
                 'imperial': match.group('imperial').replace('\u00a0', ' '),
                 'metric': match.group('metric').replace('\u00a0', ' ')
             }
+        elif key.startswith('Date of birth'):
+            dob = tr.xpath("./td/text()[normalize-space()]").get()
+            player_info['Date of birth'] = dob
 
     return player_info
 
@@ -97,7 +101,7 @@ def club_info(html):
         if value is None:
             value = tr.xpath("./td/text()").get()
     
-        if key is None or value is None:
+        if key is None:
             continue
         if key.startswith('Full name'):
             club_info["Full Name"] = value.strip('\n')
@@ -105,5 +109,10 @@ def club_info(html):
             club_info['Ground'] = value
         elif key.startswith('Capacity'):
             club_info['Capacity'] = value
+        elif key.startswith('Founded'):
+            dat = tr.xpath("./td").get()
+            match = re.search('(?P<Date>\d+\s\w+\s\d+)',dat)
+            club_info['Founded'] = str(dateparser.parse(match.group('Date')))
+            
     
     return club_info
